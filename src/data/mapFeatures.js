@@ -129,38 +129,93 @@ export const mapFeatures = [
 
         ]
     },
-    {
-        key: 'agua',
-        label: 'Rede de Água',
-        visible: true,
-        color: '#0074D9',
-        type: 'polyline',
-        items: [
+{
+    key: 'agua',
+    label: 'Sistema de Abastecimento de Água',
+    visible: true,
+    color: '#1E90FF',
+    type: 'polyline',
+    items: [
         {
-            coords: [[-10.914, -37.071], [-10.921, -37.101], [-10.942, -37.110]],
-            popup: 'Adutora do São Francisco - Sistema de Abastecimento de Aracaju'
-        },
-        {
-            coords: [[-10.870, -37.250], [-10.872, -37.190], [-10.879, -37.140]],
-            popup: 'Rede de distribuição - Itabaiana'
-        }
+            coords: [
+                [-10.914, -37.071], // Aracaju
+                [-10.921, -37.101], 
+                [-10.942, -37.110]  // Terminal São Francisco
+            ],
+            popup: `<b>Adutora do São Francisco</b><br>
+                    Extensão: 45km<br>
+                    Capacidade: 2.500 L/s<br>
+                    População atendida: 800.000 hab`
+            },
+            {
+            coords: [
+                [-10.870, -37.250], // Itabaiana
+                [-10.872, -37.190],
+                [-10.879, -37.140]  // Ribeirópolis
+            ],
+            popup: `<b>Sistema Itabaiana-Ribeirópolis</b><br>
+                    Extensão: 32km<br>
+                    Diâmetro: 400mm`
+            },
+            {
+            coords: [
+                [-11.050, -37.200], // Estância
+                [-11.020, -37.180],
+                [-10.990, -37.150]  // Santa Luzia
+            ],
+            popup: `<b>Adutora Estância-Santa Luzia</b><br>
+                    Extensão: 25km<br>
+                    Material: PVC 300mm`
+            },
+            {
+            coords: [
+                [-10.500, -37.450], // N. S. da Glória
+                [-10.550, -37.400],
+                [-10.600, -37.350]  // Poço Verde
+            ],
+            popup: `<b>Sistema Glória-Poço Verde</b><br>
+                    Extensão: 40km<br>
+                    Fonte: Açude Jacaré`
+            }
         ]
     },
-    {
-        key: 'gas',
-        label: 'Rede de Gás Canalizado - Sergás',
-        visible: true,
-        color: '#FF851B',
-        type: 'polyline',
-        items: [
+   {
+    key: 'gas',
+    label: 'Rede de Gás Canalizado - Sergás',
+    visible: true,
+    color: '#FF6347',
+    type: 'polyline',
+    items: [
         {
-            coords: [[-10.900, -37.090], [-10.925, -37.070], [-10.950, -37.060]],
-            popup: 'Gasoduto Aracaju-Barra dos Coqueiros'
-        },
-        {
-            coords: [[-10.950, -37.090], [-11.000, -37.100]],
-            popup: 'Rede de gás Zona de Expansão - Atalaia'
-        }
+            coords: [
+                [-10.900, -37.090], // Aracaju
+                [-10.925, -37.070], 
+                [-10.950, -37.060]  // Barra dos Coqueiros
+            ],
+            popup: `<b>Gasoduto Aracaju-Barra</b><br>
+                    Extensão: 15km<br>
+                    Diâmetro: 12"<br>
+                    Capacidade: 50.000 m³/dia`
+            },
+            {
+            coords: [
+                [-10.950, -37.090], // Aracaju
+                [-11.000, -37.100]  // Atalaia
+            ],
+            popup: `<b>Ramal Atalaia</b><br>
+                    Extensão: 20km<br>
+                    Investimento: R$ 35 milhões`
+            },
+            {
+            coords: [
+                [-10.850, -37.100], // São Cristóvão
+                [-10.880, -37.120], 
+                [-10.900, -37.150]  // Laranjeiras
+            ],
+            popup: `<b>Gasoduto Histórico</b><br>
+                    Primeira rede do estado<br>
+                    Ano de implantação: 1998`
+            }
         ]
     },
     {
@@ -189,34 +244,76 @@ export const mapFeatures = [
         color: 'red',
         type: 'marker',
         items: [
-            { coords: [-10.9472, -37.0731], popup: '<b>Obra em Andamento</b><br>Usina Solar Barra dos Coqueiros' },
-            { coords: [-11.0705, -37.2072], popup: '<b>Obra em Andamento</b><br>Expansão Portuária de Estância' },
-            { coords: [-10.9122, -37.0717], popup: '<b>Obra em Andamento</b><br>Duplicação da Av. Euclides Figueiredo' },
-            { coords: [-10.9600, -37.0300], popup: '<b>Obra em Andamento</b><br>Construção de ETE Leste' },
-            { coords: [-10.9100, -37.0400], popup: '<b>Obra em Andamento</b><br>Requalificação Viária Zona Norte' },
-            { coords: [-10.8900, -37.0800], popup: '<b>Obra em Andamento</b><br>Implantação da Linha Verde' },
-            { coords: [-10.9500, -37.1500], popup: '<b>Obra em Andamento</b><br>Nova Ponte sobre o Rio Poxim' },
-            { coords: [-10.8700, -37.1000], popup: '<b>Obra em Andamento</b><br>Centro de Convenções Sul' },
-            { coords: [-10.9300, -37.0600], popup: '<b>Obra em Andamento</b><br>Habitação Popular - Bairro Novo' },
-            { coords: [-10.9900, -37.0700], popup: '<b>Obra em Andamento</b><br>Parque Tecnológico Zona Oeste' }
+            {
+                coords: [-10.500, -37.450], // Glória
+                popup: `<b>Usina Solar Glória</b><br>
+                        Potência: 50MW<br>
+                        Investimento: R$ 200 mi<br>
+                        Conclusão: Dez/2024`
+            },
+            {
+                coords: [-11.100, -37.250], // Indiaroba
+                popup: `<b>Porto Indiaroba</b><br>
+                        Área: 150ha<br>
+                        Capacidade: 5M ton/ano`
+            },
+            {
+                coords: [-10.750, -37.200], // Lagarto
+                popup: `<b>Hospital Regional</b><br>
+                        200 leitos<br>
+                        Área: 15.000m²`
+            },
+            {
+                coords: [-10.300, -36.900], // Pirambu
+                popup: `<b>Polo Aquícola</b><br>
+                        50 tanques-rede<br>
+                        Geração: 500 empregos`
+            },
+            {
+                coords: [-10.850, -37.100], // São Cristóvão
+                popup: `<b>Restauração do Convento</b><br>
+                        Patrimônio histórico<br>
+                        Investimento: R$ 15 mi`
+            }
         ]
     },
     {
-        key: 'senai',
-        label: 'SENAI / SENAC / SEBRAE / SENAR',
+        key: 'educacao',
+        label: 'Centros de Formação',
         visible: true,
         color: 'green',
         type: 'marker',
         items: [
-            { coords: [-10.9472, -37.0731], popup: '<b>SENAI Aracaju</b><br>Av. Tancredo Neves, 5600' },
-            { coords: [-11.0705, -37.2072], popup: '<b>SEBRAE Estância</b><br>Rua Capitão Salomão, 299' },
-            { coords: [-10.9000, -37.0500], popup: '<b>SENAI Zona Norte</b><br>Rua Industrial, 123' },
-            { coords: [-10.9700, -37.0800], popup: '<b>SEBRAE Centro</b><br>Rua do Comércio, 88' },
-            { coords: [-11.0000, -37.1500], popup: '<b>SENAR SE</b><br>Rodovia dos Agricultores, km 5' },
-            { coords: [-10.9500, -37.1300], popup: '<b>SENAI Estância</b><br>Rua Industrial, 333' },
-            { coords: [-10.8600, -37.0900], popup: '<b>SENAC Itabaiana</b><br>Avenida das Nações, 999' },
-            { coords: [-10.9100, -37.1500], popup: '<b>SENAI Lagarto</b><br>Rua do Progresso, 45' },
-            { coords: [-10.9800, -37.1200], popup: '<b>SEBRAE Nossa Senhora do Socorro</b><br>Rua Central, 22' }
+            {
+                coords: [-10.950, -37.100], // Aracaju
+                popup: `<b>SENAI CETIND</b><br>
+                        Cursos: 25<br>
+                        Alunos/ano: 2.500`
+            },
+            {
+                coords: [-10.700, -37.450], // Itabaiana
+                popup: `<b>SENAC Itabaiana</b><br>
+                        Foco: Comércio e Serviços<br>
+                        Laboratórios: 12`
+            },
+            {
+                coords: [-11.000, -37.200], // Estância
+                popup: `<b>SENAR Centro</b><br>
+                        Cursos agrícolas<br>
+                        Área experimental: 10ha`
+            },
+            {
+                coords: [-10.500, -37.300], // Frei Paulo
+                popup: `<b>Escola Agrotécnica</b><br>
+                        Parceria SENAR<br>
+                        Capacitação rural`
+            },
+            {
+                coords: [-10.300, -37.100], // Neópolis
+                popup: `<b>Centro de Inovação</b><br>
+                        Incubadora de negócios<br>
+                        SEBRAE/IEL`
+            }
         ]
     }
 ];

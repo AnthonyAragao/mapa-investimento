@@ -89,11 +89,10 @@ function createMapElement(layer, item) {
     if (layer.key === 'obras') {
       icon = L.icon({
         iconUrl: '/images/construcao.png',
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
+        iconSize: [24, 24],
         popupAnchor: [0, -32],
       });
-    } else if (layer.key === 'senai') {
+    } else if (layer.key === 'educacao') {
       icon = L.icon({
         iconUrl: '/images/educacao.png',
         iconSize: [24, 24],
@@ -256,7 +255,7 @@ onMounted(() => {
                                 <img src="/images/construcao.png" alt="Ícone de Obra" class="w-4 h-4 mx-1">
                             </template>
 
-                            <template v-else-if="layer.key === 'senai'">
+                            <template v-else-if="layer.key === 'educacao'">
                                 <img src="/images/educacao.png" alt="Ícone de Educação" class="w-4 h-4 mx-1">
                             </template>
 
