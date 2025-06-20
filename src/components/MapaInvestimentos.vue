@@ -1,0 +1,216 @@
+<script setup>
+import { ref, onMounted } from 'vue';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { mapFeatures } from '../data/mapFeatures';
+
+const map         = ref(null);
+const layers      = ref(mapFeatures);
+const layerGroups = ref({});
+
+function initMap() {
+  map.value = L.map('map', {
+    center: [-10.9472, -37.0731],
+    zoom: 8,
+    minZoom: 7,
+  });
+
+  // https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '© OpenStreetMap contributors',
+    maxZoom: 19,
+    noWrap: true
+  }).addTo(map.value);
+}
+
+function initLayers() {
+  layers.value.forEach(layer => {
+    const group = L.layerGroup();
+
+    layer.items.forEach(item => {
+      let element;
+
+      const options = {
+        color: layer.color,
+        interactive: true
+      };
+
+      if (layer.type === 'polyline') {
+        element = L.polyline(
+            item.coords,
+            {
+                color: layer.color,
+                weight: 2,
+                ...(item.options || {})
+            }
+        );
+      } else if (layer.type === 'marker') {
+        let icon;
+        if (layer.key === 'obras') {
+            icon = L.icon({
+                iconUrl: '/images/construcao.png',
+                iconSize: [32, 32],
+                iconAnchor: [16, 32],
+                popupAnchor: [0, -32],
+            });
+        } else if (layer.key === 'senai') {
+            icon = L.icon({
+                iconUrl: '/images/educacao.png',
+                iconSize: [24, 24],
+                iconAnchor: [16, 32],
+                popupAnchor: [0, -32],
+            });
+        } else {
+            icon = createCustomIcon(layer.color);
+        }
+
+        element = L.marker(item.coords, { icon });
+      }
+
+      if (item.popup) {
+        element.bindPopup(item.popup, { autoClose: true });
+      }
+
+      group.addLayer(element);
+    });
+
+    layerGroups.value[layer.key] = group;
+
+    if (layer.visible) {
+      group.addTo(map.value);
+    }
+  });
+}
+
+const loadMalhasIBGE = async () => {
+    try {
+        const response = await fetch('https://servicodados.ibge.gov.br/api/v3/malhas/estados/28?formato=application/vnd.geo+json&qualidade=maxima&intrarregiao=municipio');
+        const data = await response.json();
+
+        L.geoJSON(data, {
+            style: {
+                color: '#223D58',
+                weight: 0.7,
+                fillOpacity: 0.04,
+                fillColor: '#223D58'
+            },
+            interactive: false,
+        }).addTo(map.value);
+    } catch (error) {
+        console.error('Erro ao carregar as malhas do IBGE:', error);
+    }
+};
+
+function createCustomIcon(color) {
+  return L.divIcon({
+    className: 'custom-marker',
+    html: `<div style="background-color: ${color}; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white"></div>`,
+    iconSize: [16, 16]
+  });
+}
+
+function toggleLayer(key) {
+  const layer = layerGroups.value[key];
+  const layerState = layers.value.find(l => l.key === key);
+
+  if (layerState.visible) {
+    layer.addTo(map.value);
+  } else {
+    map.value.removeLayer(layer);
+  }
+}
+
+onMounted(() => {
+  initMap();
+  initLayers();
+  loadMalhasIBGE();
+});
+</script>
+
+<template>
+  <div class="flex flex-col h-screen">
+    <header class="w-full bg-gradient-to-r from-[#223D58] via-[#2b537a] to-[#3a7ca5] text-white py-4 px-6 flex items-center justify-between shadow-md">
+        <div class="flex items-center space-x-3">
+            <i class="fas fa-map-marked-alt text-3xl drop-shadow"></i>
+            <h1 class="text-2xl md:text-3xl font-bold tracking-tight drop-shadow">GeoInvest</h1>
+        </div>
+
+        <span class="hidden md:block text-md font-medium drop-shadow">Mapa de Investimentos em Sergipe</span>
+    </header>
+
+    <!-- Main Content -->
+    <div class="flex flex-1 relative">
+        <div class="bg-[#223D58] w-14 px-2 flex flex-col items-center">
+            <button class="text-gray-200 text-lg mt-4 mb-2">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
+
+        <!-- Botão flutuante de camadas -->
+        <div class="absolute top-4 right-4 z-[1000] group">
+            <button
+                class="bg-white text-[#223D58] px-5 py-3  rounded-md shadow-lg hover:bg-gray-100 transition-all border border-gray-400"
+                title="Camadas"
+            >
+                <i class="fas fa-layer-group text-xl"></i>
+            </button>
+
+            <!-- Painel de camadas (aparece ao passar o mouse) -->
+            <div class="hidden group-hover:block absolute top-0 right-12 bg-white rounded-lg shadow-xl p-4 w-96">
+                <div class="space-y-2">
+                    <div
+                        v-for="layer in layers"
+                        :key="layer.key"
+                        class="flex items-center"
+                    >
+                        <input
+                            type="checkbox"
+                            :id="layer.key"
+                            v-model="layer.visible"
+                            @change="toggleLayer(layer.key)"
+                            class="h-4 w-4 text-[#223D58] rounded focus:ring-blue-500"
+                        >
+
+                        <!-- Ícones personalizados para 'obras' e 'senai' -->
+                        <template v-if="layer.key === 'obras'">
+                            <img src="/images/construcao.png" alt="Ícone de Obra" class="w-4 h-4 mx-1">
+                        </template>
+
+                        <template v-else-if="layer.key === 'senai'">
+                            <img src="/images/educacao.png" alt="Ícone de Educação" class="w-4 h-4 mx-1">
+                        </template>
+
+                        <template v-else>
+                            <span
+                                class="inline-block w-4 h-1 mx-1"
+                                :style="{ backgroundColor: layer.color || '#ccc' }"
+                            ></span>
+                        </template>
+
+                        <label :for="layer.key" class="text-gray-700 text-xs">{{ layer.label }}</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mapa -->
+        <div id="map" class="flex-1"></div>
+    </div>
+  </div>
+</template>
+
+
+<style>
+    .leaflet-control-zoom-in,
+    .leaflet-control-zoom-out {
+        font-size: 1.7rem !important;
+        width: 48px !important;
+        height: 48px !important;
+        line-height: 48px !important;
+    }
+    .leaflet-control-zoom {
+        border-radius: 10px !important;
+        overflow: hidden;
+    }
+</style>
