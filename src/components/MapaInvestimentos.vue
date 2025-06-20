@@ -11,7 +11,7 @@ const layerGroups = ref({});
 function initMap() {
   map.value = L.map('map', {
     center: [-10.9472, -37.0731],
-    zoom: 8,
+    zoom: 9,
     minZoom: 7,
   });
 
@@ -25,63 +25,100 @@ function initMap() {
 
 function initLayers() {
   layers.value.forEach(layer => {
-    const group = L.layerGroup();
-
-    layer.items.forEach(item => {
-      let element;
-
-      const options = {
-        color: layer.color,
-        interactive: true
-      };
-
-      if (layer.type === 'polyline') {
-        element = L.polyline(
-            item.coords,
-            {
-                color: layer.color,
-                weight: 2,
-                ...(item.options || {})
-            }
-        );
-      } else if (layer.type === 'marker') {
-        let icon;
-        if (layer.key === 'obras') {
-            icon = L.icon({
-                iconUrl: '/images/construcao.png',
-                iconSize: [32, 32],
-                iconAnchor: [16, 32],
-                popupAnchor: [0, -32],
-            });
-        } else if (layer.key === 'senai') {
-            icon = L.icon({
-                iconUrl: '/images/educacao.png',
-                iconSize: [24, 24],
-                iconAnchor: [16, 32],
-                popupAnchor: [0, -32],
-            });
-        } else {
-            icon = createCustomIcon(layer.color);
+    // Se for um grupo de layers
+    if (layer.type === 'group') {
+      const parentGroup = L.layerGroup();
+      
+      layer.layers.forEach(subLayer => {
+        const subGroup = L.layerGroup();
+        
+        subLayer.items.forEach(item => {
+          let element = createMapElement(subLayer, item);
+          if (element) subGroup.addLayer(element);
+        });
+        
+        layerGroups.value[subLayer.key] = subGroup;
+        
+        if (subLayer.visible) {
+          subGroup.addTo(map.value);
         }
-
-        element = L.marker(item.coords, { icon });
+        
+        parentGroup.addLayer(subGroup);
+      });
+      
+      layerGroups.value[layer.key] = parentGroup;
+      
+      if (layer.visible) {
+        parentGroup.addTo(map.value);
       }
-
-      if (item.popup) {
-        element.bindPopup(item.popup, { autoClose: true });
+    } 
+    // Se for um layer individual
+    else {
+      const group = L.layerGroup();
+      
+      layer.items.forEach(item => {
+        let element = createMapElement(layer, item);
+        if (element) group.addLayer(element);
+      });
+      
+      layerGroups.value[layer.key] = group;
+      
+      if (layer.visible) {
+        group.addTo(map.value);
       }
-
-      group.addLayer(element);
-    });
-
-    layerGroups.value[layer.key] = group;
-
-    if (layer.visible) {
-      group.addTo(map.value);
     }
   });
 }
 
+// Função auxiliar para criar elementos do mapa
+function createMapElement(layer, item) {
+  let element;
+  const options = {
+    color: layer.color,
+    interactive: true
+  };
+
+  if (layer.type === 'polyline') {
+    element = L.polyline(item.coords, {
+      color: layer.color,
+      weight:  1 ,...(item.options || {})
+    });
+  } 
+  else if (layer.type === 'marker') {
+    let icon;
+    if (layer.key === 'obras') {
+      icon = L.icon({
+        iconUrl: '/images/construcao.png',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32],
+      });
+    } else if (layer.key === 'senai') {
+      icon = L.icon({
+        iconUrl: '/images/educacao.png',
+        iconSize: [24, 24],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32],
+      });
+    } else {
+      icon = createCustomIcon(layer.color);
+    }
+    element = L.marker(item.coords, { icon });
+  }
+
+  if (element && item.popup) {
+    element.bindPopup(item.popup, { 
+      autoClose: false,
+      className: `${layer.key}-popup`
+    });
+    
+    element.on('click', function(e) {
+      this.openPopup(e.latlng);
+    });
+  }
+
+  return element;
+}
 const loadMalhasIBGE = async () => {
     try {
         const response = await fetch('https://servicodados.ibge.gov.br/api/v3/malhas/estados/28?formato=application/vnd.geo+json&qualidade=maxima&intrarregiao=municipio');
@@ -110,14 +147,33 @@ function createCustomIcon(color) {
 }
 
 function toggleLayer(key) {
+  // Verifica se é um layer principal ou sublayer
   const layer = layerGroups.value[key];
-  const layerState = layers.value.find(l => l.key === key);
-
+  const layerState = findLayerState(key);
+  
+  if (!layer || !layerState) return;
+  
   if (layerState.visible) {
     layer.addTo(map.value);
   } else {
     map.value.removeLayer(layer);
   }
+}
+
+// Função auxiliar para encontrar o estado do layer (principal ou sublayer)
+function findLayerState(key) {
+  // Procura nos layers principais
+  let layer = layers.value.find(l => l.key === key);
+  if (layer) return layer;
+  
+  // Se não encontrou, procura nas subcamadas
+  for (const parentLayer of layers.value) {
+    if (parentLayer.type === 'group' && parentLayer.layers) {
+      const subLayer = parentLayer.layers.find(l => l.key === key);
+      if (subLayer) return subLayer;
+    }
+  }
+  return null;
 }
 
 onMounted(() => {
@@ -156,40 +212,63 @@ onMounted(() => {
                 <i class="fas fa-layer-group text-xl"></i>
             </button>
 
+
             <!-- Painel de camadas (aparece ao passar o mouse) -->
             <div class="hidden group-hover:block absolute top-0 right-12 bg-white rounded-lg shadow-xl p-4 w-96">
                 <div class="space-y-2">
-                    <div
-                        v-for="layer in layers"
-                        :key="layer.key"
-                        class="flex items-center"
-                    >
-                        <input
-                            type="checkbox"
-                            :id="layer.key"
-                            v-model="layer.visible"
-                            @change="toggleLayer(layer.key)"
-                            class="h-4 w-4 text-[#223D58] rounded focus:ring-blue-500"
-                        >
+                    <template v-for="layer in layers" :key="layer.key">
+                        <!-- Se for um grupo (como energia), mostra o label e as subcamadas -->
+                        <div v-if="layer.type === 'group'">
+                            <div class="font-semibold text-[#223D58] text-sm mb-1">{{ layer.label }}</div>
+                                <div class="pl-4 space-y-1">
+                                    <div
+                                        v-for="sublayer in layer.layers"
+                                        :key="sublayer.key"
+                                        class="flex items-center"
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            :id="sublayer.key"
+                                            v-model="sublayer.visible"
+                                            @change="toggleLayer(sublayer.key)"
+                                            class="h-4 w-4 text-[#223D58] rounded focus:ring-blue-500"
+                                        >
+                                        <span
+                                            class="inline-block w-4 h-1 mx-1"
+                                            :style="{ backgroundColor: sublayer.color || '#ccc' }"
+                                        ></span>
+                                        <label :for="sublayer.key" class="text-gray-700 text-xs">{{ sublayer.label }}</label>
+                                    </div>
+                            </div>
+                        </div>
 
-                        <!-- Ícones personalizados para 'obras' e 'senai' -->
-                        <template v-if="layer.key === 'obras'">
-                            <img src="/images/construcao.png" alt="Ícone de Obra" class="w-4 h-4 mx-1">
-                        </template>
+                        <!-- Camadas normais (não são grupos) -->
+                        <div v-else class="flex items-center">
+                            <input
+                                type="checkbox"
+                                :id="layer.key"
+                                v-model="layer.visible"
+                                @change="toggleLayer(layer.key)"
+                                class="h-4 w-4 text-[#223D58] rounded focus:ring-blue-500"
+                            >
 
-                        <template v-else-if="layer.key === 'senai'">
-                            <img src="/images/educacao.png" alt="Ícone de Educação" class="w-4 h-4 mx-1">
-                        </template>
+                            <template v-if="layer.key === 'obras'">
+                                <img src="/images/construcao.png" alt="Ícone de Obra" class="w-4 h-4 mx-1">
+                            </template>
 
-                        <template v-else>
-                            <span
-                                class="inline-block w-4 h-1 mx-1"
-                                :style="{ backgroundColor: layer.color || '#ccc' }"
-                            ></span>
-                        </template>
+                            <template v-else-if="layer.key === 'senai'">
+                                <img src="/images/educacao.png" alt="Ícone de Educação" class="w-4 h-4 mx-1">
+                            </template>
 
-                        <label :for="layer.key" class="text-gray-700 text-xs">{{ layer.label }}</label>
-                    </div>
+                            <template v-else>
+                                <span
+                                    class="inline-block w-4 h-1 mx-1"
+                                    :style="{ backgroundColor: layer.color || '#ccc' }"
+                                ></span>
+                            </template>
+                            <label :for="layer.key" class="text-gray-700 text-xs">{{ layer.label }}</label>
+                        </div>
+                    </template>
                 </div>
             </div>
         </div>
