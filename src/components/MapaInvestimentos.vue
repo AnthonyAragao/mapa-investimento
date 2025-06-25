@@ -213,11 +213,11 @@ onMounted(() => {
 
         <!-- Main Content -->
         <div class="flex flex-1 relative">
-            <div class="hidden md:block bg-[#223D58] w-14 px-2 flex-col items-center">
+            <!-- <div class="hidden md:block bg-[#223D58] w-14 px-2 flex-col items-center">
                 <button class="text-gray-200 text-lg mt-4 mb-2">
                     <i class="fas fa-bars"></i>
                 </button>
-            </div>
+            </div> -->
 
             <!-- Botão flutuante de camadas -->
             <div
