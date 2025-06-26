@@ -188,10 +188,7 @@
         return null;
     }
 
-    function checkScreen() {
-        isMobile.value = window.innerWidth < 768;
-        if (!isMobile.value) showLayers.value = false;
-    }
+    const checkScreen = () => isMobile.value = window.innerWidth < 768;
 
     const handleMouseEnter = () => {
         if (isDesktop.value) showLayers.value = true;
@@ -202,14 +199,11 @@
     }
 
     const toggleLayersOnMobile = () => {
-        if (isMobile.value) {
-            showLayers.value = !showLayers.value;
-        }
+        if (isMobile.value) showLayers.value = !showLayers.value;
     }
 
     onMounted(() => {
         checkScreen()
-        window.addEventListener('resize', checkScreen)
         initMap();
         initLayers();
         loadMalhasIBGE();
