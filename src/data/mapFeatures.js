@@ -4,7 +4,6 @@ export const mapFeatures = [
         key: 'energia',
         label: 'Linhas de Transmissão de Energia',
         visible: true,
-        // color: 'rgb(202, 51, 94)',
         type: 'group',
         layers: [
             {
@@ -15,20 +14,20 @@ export const mapFeatures = [
                 type: 'polyline',
                 items: [
                     {
-                    coords: [
-                        [-10.3500, -37.2000], // Xingó
-                        [-10.7000, -37.0500], // Itabaiana
-                        [-11.0500, -37.2500]  // Estância
-                    ],
-                    popup: '<b>LT Xingó-Aracaju-Estância</b><br>500kV - 150km<br>Capacidade: 2000MW'
+                        coords: [
+                            [-10.3500, -37.2000], // Xingó
+                            [-10.7000, -37.0500], // Itabaiana
+                            [-11.0500, -37.2500]  // Estância
+                        ],
+                        popup: '<b>LT Xingó-Aracaju-Estância</b><br>500kV - 150km<br>Capacidade: 2000MW'
                     },
                     {
-                    coords: [
-                        [-9.9000, -37.8000],  // Paulo Afonso
-                        [-10.4000, -37.3000], 
-                        [-10.9500, -37.0700]  // Aracaju
-                    ],
-                    popup: '<b>LT Paulo Afonso-Itabaiana-Aracaju</b><br>500kV - 180km'
+                        coords: [
+                            [-9.9000, -37.8000],  // Paulo Afonso
+                            [-10.4000, -37.3000], 
+                            [-10.9500, -37.0700]  // Aracaju
+                        ],
+                        popup: '<b>LT Paulo Afonso-Itabaiana-Aracaju</b><br>500kV - 180km'
                     }
                 ]
             },
