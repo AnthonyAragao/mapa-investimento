@@ -193,6 +193,20 @@
         if (!isMobile.value) showLayers.value = false;
     }
 
+    const handleMouseEnter = () => {
+        if (isDesktop.value) showLayers.value = true;
+    }
+
+    const handleMouseLeave = () => {
+        if (isDesktop.value) showLayers.value = false;
+    }
+
+    const toggleLayersOnMobile = () => {
+        if (isMobile.value) {
+            showLayers.value = !showLayers.value;
+        }
+    }
+
     onMounted(() => {
         checkScreen()
         window.addEventListener('resize', checkScreen)
@@ -218,13 +232,13 @@
         <div class="flex flex-1 relative">
             <div
                 class="absolute top-4 right-4 z-[1000] group"
-                @mouseenter="isDesktop && (showLayers = true)"
-                @mouseleave="isDesktop && (showLayers = false)"
+                @mouseenter="handleMouseEnter"
+                @mouseleave="handleMouseLeave"
             >
                 <button
                     class="bg-white text-[#223D58] px-5 py-3  rounded-md shadow-lg hover:bg-gray-100 transition-all border border-gray-400"
                     title="Camadas"
-                    @click="isMobile && (showLayers = !showLayers)"
+                    @click="toggleLayersOnMobile"
                 >
                     <i class="fas fa-layer-group text-xl"></i>
                 </button>
