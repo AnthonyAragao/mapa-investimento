@@ -18,7 +18,8 @@
             minZoom: 7,
         });
 
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        // https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png
+        L.tileLayer('http://tile-{s}.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors',
             maxZoom: 19,
             noWrap: true
