@@ -87,10 +87,10 @@
 
             L.geoJSON(data, {
                 style: {
-                    color: '#223D58',
+                    color: '#083c94',
                     weight: 0.7,
                     fillOpacity: 0.04,
-                    fillColor: '#223D58'
+                    fillColor: '#083c94'
                 },
                 interactive: false,
             }).addTo(map.value);
@@ -212,101 +212,92 @@
 </script>
 
 <template>
-    <div class="flex flex-col h-screen">
-        <header class="w-full bg-gradient-to-r from-[#223D58] via-[#2b537a] to-[#3a7ca5] text-white py-4 px-6 flex items-center justify-between shadow-md">
-            <div class="flex items-center space-x-3">
-                <i class="fas fa-map-marked-alt text-3xl drop-shadow"></i>
-                <h1 class="text-2xl md:text-3xl font-bold tracking-tight drop-shadow">GeoInvest</h1>
+    <div class="flex flex-row h-screen">
+        <aside class="h-screen w-76 bg-gradient-to-b from-[#083c94] via-[#173f66] to-[#2b5e85] text-white py-6 px-4 flex flex-col justify-between shadow-md">
+            <!-- Logo e Título -->
+            <div class="flex flex-col items-center">
+                <img src="/images/logo-minimalista.png" alt="Logo Desenvolve-se" class="w-24 h-24">
             </div>
 
-            <span class="hidden md:block text-md font-medium drop-shadow">Mapa de Investimentos em Sergipe</span>
-        </header>
+            <div class="mt-2 space-y-4 overflow-y-auto pr-1 max-h-[70vh]">
+                <template v-for="layer in layers" :key="layer.key">
+                    <!-- Accordion para grupos -->
+                    <div v-if="layer.type === 'group'" class="bg-white rounded text-gray-800 border shadow-sm">
+                        <details class="w-full group">
+                            <summary
+                            class="cursor-pointer px-4 py-2 font-semibold text-sm flex items-center justify-between hover:bg-gray-100 transition"
+                            >
+                            {{ layer.label }}
+                            <svg
+                                class="w-4 h-4 text-[#083c94] transition-transform group-open:rotate-90"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                >
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5l7 7-7 7" />
+                            </svg>
+                            </summary>
+                            <div class="pl-4 py-2 space-y-1 bg-[#f9fafb]">
+                            <div
+                                v-for="sublayer in layer.layers"
+                                :key="sublayer.key"
+                                class="flex items-center"
+                                >
+                                <input
+                                    type="checkbox"
+                                    :id="sublayer.key"
+                                    v-model="sublayer.visible"
+                                    @change="toggleLayer(sublayer.key)"
+                                    class="h-4 w-4 text-[#083c94] rounded focus:ring-blue-500"
+                                    >
+                                <span
+                                    class="inline-block w-4 h-1 mx-1"
+                                    :style="{ backgroundColor: sublayer.color || '#ccc' }"
+                                    ></span>
+                                <label :for="sublayer.key" class="text-xs text-gray-800">
+                                {{ sublayer.label }}
+                                </label>
+                            </div>
+                            </div>
+                        </details>
+                    </div>
+                    <!-- Layers simples -->
+                    <div v-else class="flex items-center">
+                        <input
+                            type="checkbox"
+                            :id="layer.key"
+                            v-model="layer.visible"
+                            @change="toggleLayer(layer.key)"
+                            class="h-4 w-4 text-[#083c94] rounded focus:ring-blue-500"
+                            >
+                        <template v-if="layer.key === 'obras'">
+                            <img src="/images/construcao.png" alt="Ícone de Obra" class="w-4 h-4 mx-1">
+                        </template>
+                        <template v-else-if="layer.key === 'educacao'">
+                            <img src="/images/educacao.png" alt="Ícone de Educação" class="w-4 h-4 mx-1">
+                        </template>
+                        <template v-else>
+                            <span
+                            class="inline-block w-4 h-1 mx-1"
+                            :style="{ backgroundColor: layer.color || '#ccc' }"
+                            ></span>
+                        </template>
+                        <label :for="layer.key" class="text-xs white">
+                        {{ layer.label }}
+                        </label>
+                    </div>
+                </template>
+                </div>
 
+            <!-- Subtítulo -->
+            <span class="hidden md:block text-sm font-medium text-center mt-6 drop-shadow">
+                Mapa de Investimentos<br />em Sergipe
+            </span>
+        </aside>
 
         <!-- Main Content -->
         <div class="flex flex-1 relative">
-            <div
-                class="absolute top-4 right-4 z-[1000] group"
-                @mouseenter="handleMouseEnter"
-                @mouseleave="handleMouseLeave"
-            >
-                <button
-                    class="bg-white text-[#223D58] px-5 py-3  rounded-md shadow-lg hover:bg-gray-100 transition-all border border-gray-400"
-                    title="Camadas"
-                    @click="toggleLayersOnMobile"
-                >
-                    <i class="fas fa-layer-group text-xl"></i>
-                </button>
-
-                <!-- Painel de camadas -->
-                <div
-                    v-if="showLayers"
-                    class="absolute top-16 right-0 md:top-0 md:right-12 bg-white rounded-lg shadow-xl p-4 w-72 md:w-96"
-                    @click.stop
-                >
-                    <div class="space-y-2">
-                        <template v-for="layer in layers" :key="layer.key">
-                            <!-- Se for um grupo (como energia), mostra o label e as subcamadas -->
-                            <div v-if="layer.type === 'group'">
-                                <span class="font-semibold text-[#223D58] text-sm mb-1">{{ layer.label }}</span>
-
-                                <div class="pl-4 space-y-1">
-                                    <div
-                                        v-for="sublayer in layer.layers"
-                                        :key="sublayer.key"
-                                        class="flex items-center"
-                                    >
-                                        <input
-                                            type="checkbox"
-                                            :id="sublayer.key"
-                                            v-model="sublayer.visible"
-                                            @change="toggleLayer(sublayer.key)"
-                                            class="h-4 w-4 text-[#223D58] rounded focus:ring-blue-500"
-                                        >
-                                        <span
-                                            class="inline-block w-4 h-1 mx-1"
-                                            :style="{ backgroundColor: sublayer.color || '#ccc' }"
-                                        ></span>
-                                        
-                                        <label :for="sublayer.key" class="text-gray-700 text-xs">
-                                            {{ sublayer.label }}
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Camadas normais (não são grupos) -->
-                            <div v-else class="flex items-center">
-                                <input
-                                    type="checkbox"
-                                    :id="layer.key"
-                                    v-model="layer.visible"
-                                    @change="toggleLayer(layer.key)"
-                                    class="h-4 w-4 text-[#223D58] rounded focus:ring-blue-500"
-                                >
-
-                                <template v-if="layer.key === 'obras'">
-                                    <img src="/images/construcao.png" alt="Ícone de Obra" class="w-4 h-4 mx-1">
-                                </template>
-
-                                <template v-else-if="layer.key === 'educacao'">
-                                    <img src="/images/educacao.png" alt="Ícone de Educação" class="w-4 h-4 mx-1">
-                                </template>
-
-                                <template v-else>
-                                    <span
-                                        class="inline-block w-4 h-1 mx-1"
-                                        :style="{ backgroundColor: layer.color || '#ccc' }"
-                                    ></span>
-                                </template>
-
-                                <label :for="layer.key" class="text-gray-700 text-xs">{{ layer.label }}</label>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-            </div>
-
             <!-- Mapa -->
             <div id="map" class="flex-1"></div>
         </div>
